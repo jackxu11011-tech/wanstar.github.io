@@ -160,7 +160,7 @@
 
 <div class="container">
     <h1>人生规划评估</h1>
-    <div class="brand">🐳 DeepSeek Life Compass</div>
+    <div class="brand">Life Compass</div>
 
     <form id="deepseekForm">
         <div class="form-grid">
@@ -253,12 +253,9 @@
 </div>
 
 <script>
-    // ================= 配置区域 =================
-    // ⚠️ 请在此处填入你的 DeepSeek API Key (sk-...)
-    const API_KEY = "sk-261dd225fc0b4633a05b649eb92698fc"; 
+
+    const API_URL = "http://localhost:3000/api/chat";
     
-    // API 地址
-    const API_URL = "https://api.deepseek.com/chat/completions";
     // ===========================================
 
     async function callDeepSeek() {
@@ -274,10 +271,10 @@
         };
 
         // 2. 校验 Key
-        if (API_KEY === "在这里填入你的_DeepSeek_API_KEY" || API_KEY === "") {
-            alert("请在代码的第 163 行填入正确的 DeepSeek API Key！");
-            return;
-        }
+        //if (API_KEY === "在这里填入你的_DeepSeek_API_KEY" || API_KEY === "") {
+        //    alert("请在代码的第 163 行填入正确的 DeepSeek API Key！");
+        //    return;
+        //}
 
         // 3. UI 状态切换
         const btn = document.querySelector('.btn-submit');
@@ -306,14 +303,15 @@
 
         // 5. 调用 DeepSeek API
         try {
+            // 请求我们自己的后端
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
+                    'Content-Type': 'application/json'
+                    // 注意：这里不需要 Authorization 头了，Key 在后端加
                 },
                 body: JSON.stringify({
-                    model: "deepseek-chat", // 或者 "deepseek-reasoner"
+                    model: "deepseek-chat",
                     messages: [
                         { role: "system", content: systemPrompt },
                         { role: "user", content: userPrompt }
