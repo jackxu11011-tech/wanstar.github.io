@@ -214,6 +214,7 @@
                     <option value="身心疲惫/健康焦虑">身心疲惫 / 健康焦虑</option>
                     <option value="财务压力/入不敷出">负债累累 / 财务压力</option>
                     <option value="缺乏意义感/平庸">生活平淡 / 缺乏意义感</option>
+                    <option value="暂无">暂无</option>
                 </select>
             </div>
 
@@ -224,6 +225,7 @@
                     <option value="财富自由/提前退休">财富自由 / 环游世界</option>
                     <option value="家庭和睦/儿女成才">家庭和睦 / 岁月静好</option>
                     <option value="自我实现/精神富足">自我实现 / 精神富足</option>
+                    <option value="暂无">暂无</option>
                 </select>
             </div>
 
@@ -286,7 +288,7 @@
         resultArea.style.display = 'none';
 
         // 4. 构建 System Prompt 和 User Prompt
-        const systemPrompt = `你是一位世界顶级的首席人生规划师，擅长用简洁、温暖且一针见血的语言提供建议。你的任务是根据用户画像，提供一份【人生圆满度评估报告】。请按Markdown格式输出：
+        const systemPrompt = `你是一位世界顶级的首席人生规划师，擅长用简洁、温暖且一针见血的语言提供建议。你的任务是根据用户画像，提供一份【人生规划评估报告】。请按Markdown格式输出：
         1. **🧭 现状诊断**：用3个关键词定义用户处境，并简述原因。
         2. **🪜 破局三策**：针对痛点和愿景，给出上、中、下三条具体建议。
         3. **🔮 5年推演**：不改变会怎样？改变了会怎样？
