@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 人生罗盘</title>
+    <!-- 引入 Markdown 渲染库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            /* DeepSeek 风格通常偏向深蓝/黑，这里保持原本清爽的蓝色系，稍微调整 */
+            --primary-color: #4D6BFE; 
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #202124;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            color: #5f6368;
+            margin-bottom: 5px;
+        }
+        
+        .brand {
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #5f6368;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            background-color: #fff;
+            font-size: 15px;
+            color: #3c4043;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234D6BFE%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right .7em top 50%;
+            background-size: .65em auto;
+        }
+
+        .range-wrap {
+            padding: 10px 0;
+        }
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--primary-color);
+        }
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, #4D6BFE, #6C85FE);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 25px;
+            box-shadow: 0 4px 10px rgba(77, 107, 254, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: wait;
+        }
+
+        #result-area {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+
+        .markdown-body {
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .markdown-body h2 { font-size: 18px; color: var(--primary-color); margin-top: 20px; }
+        .markdown-body strong { color: #202124; }
+        .markdown-body ul { padding-left: 20px; color: #4a4a4a; }
+        .markdown-body li { margin-bottom: 8px; }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>人生规划评估</h1>
+    <div class="brand">🐳 DeepSeek Life Compass</div>
+
+    <form id="deepseekForm">
+        <div class="form-grid">
+            <!-- 1. 基础信息 -->
+            <div>
+                <label>年龄阶段</label>
+                <select id="ageGroup">
+                    <option value="20-25岁 (探索期)">20-25岁 (探索期)</option>
+                    <option value="26-30岁 (冲刺期)">26-30岁 (冲刺期)</option>
+                    <option value="31-35岁 (压力期)" selected>31-35岁 (压力期)</option>
+                    <option value="36-45岁 (稳重期)">36-45岁 (稳重期)</option>
+                    <option value="46岁以上 (收获期)">46岁以上 (收获期)</option>
+                </select>
+            </div>
+            <div>
+                <label>学历背景</label>
+                <select id="education">
+                    <option value="高中及以下">高中及以下</option>
+                    <option value="大专">大专</option>
+                    <option value="本科" selected>本科</option>
+                    <option value="硕士/博士">硕士/博士</option>
+                </select>
+            </div>
+
+            <!-- 2. 资产与家庭 -->
+            <div>
+                <label>资产负债</label>
+                <select id="assets">
+                    <option value="无房无车无存款">无房无车，积蓄较少</option>
+                    <option value="有房贷/车贷，压力大" selected>有房/车贷，压力较大</option>
+                    <option value="有资产，负债可控">有资产，负债可控</option>
+                    <option value="财务自由/充裕">资产充裕/财务自由</option>
+                </select>
+            </div>
+            <div>
+                <label>家庭/情感状态</label>
+                <select id="status">
+                    <option value="单身">单身</option>
+                    <option value="恋爱中/已婚无孩">恋爱中/已婚无孩</option>
+                    <option value="已婚有孩 (抚育期)">已婚有孩 (抚育期)</option>
+                    <option value="离异/独居">离异/独居</option>
+                </select>
+            </div>
+
+            <!-- 3. 核心诉求 (全宽) -->
+            <div class="full-width">
+                <label>你目前最大的痛点是？</label>
+                <select id="pain">
+                    <option value="职业迷茫/晋升受阻">职业迷茫 / 收入瓶颈</option>
+                    <option value="家庭矛盾/情感空虚">家庭矛盾 / 情感孤独</option>
+                    <option value="身心疲惫/健康焦虑">身心疲惫 / 健康焦虑</option>
+                    <option value="财务压力/入不敷出">负债累累 / 财务压力</option>
+                    <option value="缺乏意义感/平庸">生活平淡 / 缺乏意义感</option>
+                </select>
+            </div>
+
+            <div class="full-width">
+                <label>你最渴望的人生愿景是？</label>
+                <select id="goal">
+                    <option value="事业有成/社会地位">事业有成 / 社会地位</option>
+                    <option value="财富自由/提前退休">财富自由 / 环游世界</option>
+                    <option value="家庭和睦/儿女成才">家庭和睦 / 岁月静好</option>
+                    <option value="自我实现/精神富足">自我实现 / 精神富足</option>
+                </select>
+            </div>
+
+            <!-- 4. 幸福感滑块 -->
+            <div class="full-width range-wrap">
+                <label>当前主观幸福指数 (1-10)</label>
+                <input type="range" id="happiness" min="1" max="10" value="6">
+                <div class="range-labels">
+                    <span>😫 痛苦</span>
+                    <span>😐 一般</span>
+                    <span>🤩 完美</span>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn-submit" onclick="callDeepSeek()">生成评估方案</button>
+    </form>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p style="font-size: 14px; color: #666;">正在为您深度思考...</p>
+    </div>
+
+    <div id="result-area">
+        <div id="markdown-content" class="markdown-body"></div>
+    </div>
+</div>
+
+<script>
+    // ================= 配置区域 =================
+    // ⚠️ 请在此处填入你的 DeepSeek API Key (sk-...)
+    const API_KEY = "sk-261dd225fc0b4633a05b649eb92698fc"; 
+    
+    // API 地址
+    const API_URL = "https://api.deepseek.com/chat/completions";
+    // ===========================================
+
+    async function callDeepSeek() {
+        // 1. 获取所有选项的值
+        const data = {
+            age: document.getElementById('ageGroup').value,
+            edu: document.getElementById('education').value,
+            assets: document.getElementById('assets').value,
+            status: document.getElementById('status').value,
+            pain: document.getElementById('pain').value,
+            goal: document.getElementById('goal').value,
+            happiness: document.getElementById('happiness').value
+        };
+
+        // 2. 校验 Key
+        if (API_KEY === "在这里填入你的_DeepSeek_API_KEY" || API_KEY === "") {
+            alert("请在代码的第 163 行填入正确的 DeepSeek API Key！");
+            return;
+        }
+
+        // 3. UI 状态切换
+        const btn = document.querySelector('.btn-submit');
+        const loader = document.getElementById('loader');
+        const resultArea = document.getElementById('result-area');
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        resultArea.style.display = 'none';
+
+        // 4. 构建 System Prompt 和 User Prompt
+        const systemPrompt = `你是一位世界顶级的首席人生规划师，擅长用简洁、温暖且一针见血的语言提供建议。你的任务是根据用户画像，提供一份【人生圆满度评估报告】。请按Markdown格式输出：
+        1. **🧭 现状诊断**：用3个关键词定义用户处境，并简述原因。
+        2. **🪜 破局三策**：针对痛点和愿景，给出上、中、下三条具体建议。
+        3. **🔮 5年推演**：不改变会怎样？改变了会怎样？
+        4. **💌 能量寄语**：一句直击人心的话。`;
+
+        const userPrompt = `
+        用户画像：
+        - 阶段：${data.age}，学历为${data.edu}。
+        - 现状：${data.status}，资产状况为“${data.assets}”。
+        - 幸福感自评：${data.happiness}/10。
+        - 最大痛点：${data.pain}。
+        - 终极愿景：${data.goal}。
+        `;
+
+        // 5. 调用 DeepSeek API
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat", // 或者 "deepseek-reasoner"
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ],
+                    stream: false
+                })
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error?.message || 'API 请求失败');
+            }
+
+            const json = await response.json();
+            
+            // 解析 DeepSeek (OpenAI Compatible) 的返回结构
+            const aiText = json.choices[0].message.content;
+
+            // 6. 渲染结果
+            document.getElementById('markdown-content').innerHTML = marked.parse(aiText);
+            resultArea.style.display = 'block';
+            
+            // 滚动到底部
+            resultArea.scrollIntoView({ behavior: 'smooth' });
+
+        } catch (error) {
+            alert("发生错误：" + error.message);
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+            loader.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
