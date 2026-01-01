@@ -524,7 +524,7 @@
                 // 如果是视频，使用 video / video_url 字段
                 if (provider === 'qwen') {
                     // Qwen VL 标准格式: { type: "video", video: "url" }
-                    contentPayload.push({ type: "video", video: mediaUrl });
+                    contentPayload.push({ type: "video_url", video_url: mediaUrl });
                 } else {
                     // OpenAI 或其他: { type: "video_url", video_url: { url: ... } }
                     // 注意：GPT-4o 截止目前 API 对直接 video URL 支持有限，但此处按您的需求实现结构
